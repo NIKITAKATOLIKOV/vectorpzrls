@@ -1,11 +1,11 @@
 #include <iostream>
-#include "vector.h"
+#include "Vector.h"
 
 Vector::Vector(const Value* rawArray, const size_t size, float coef)
 :_size(size), _multiplicativeCoef(coef)
 {
 	reserve(_size);
-	for(int i = 0; i < _size; i++)
+	for(size_t i = 0; i < _size; i++)
     {
 		_data[i] = rawArray[i];
 	}
@@ -14,9 +14,10 @@ Vector::Vector(const Value* rawArray, const size_t size, float coef)
 Vector::Vector(const Vector& other)
 {
     _size = other._size;
-    _capacity = other._capacity;
+    _capacity = other._size;
+    _multiplicativeCoef = other._multiplicativeCoef;
     _data = new Value[_capacity];
-    for(int i = 0; i < _size; i++)
+    for(size_t i = 0; i < _size; i++)
     {
         _data[i] = other._data[i];    
     }
@@ -31,7 +32,8 @@ Vector& Vector::operator=(const Vector& other)
     {
         delete[] _data;
         _size = other._size;
-        _capacity = other._capacity;
+        _capacity = other._size;
+        _multiplicativeCoef = other._multiplicativeCoef;
         _data = new Value[_capacity];
         for(size_t i = 0; i < _size; i++)
         {
@@ -44,11 +46,12 @@ Vector& Vector::operator=(const Vector& other)
 Vector::Vector(Vector&& other) noexcept
 {
 	_size = other._size;
-    _capacity = other._capacity;
+    _multiplicativeCoef = other._multiplicativeCoef;
+    _capacity = other._size;
     _data = other._data;
 	other._data = nullptr;
     other._size = 0;
-    other._capacity = 1;
+    other._capacity = 0;
 }
 
 Vector& Vector::operator=(Vector&& other) noexcept
@@ -60,11 +63,12 @@ Vector& Vector::operator=(Vector&& other) noexcept
     {
         delete[] _data;
         _size = other._size;
-        _capacity = other._capacity;
+        _capacity = other._size;
+        _multiplicativeCoef = other._multiplicativeCoef;
         _data = other._data;
         other._data = nullptr;
         other._size = 0;
-        other._capacity = 1;
+        other._capacity = 0;
         return *this;
     }
     return *this;
@@ -77,14 +81,38 @@ Vector::~Vector()
 
 void Vector::pushBack(const Value& Value)
 {
-	reserve(_size + 1);
+    if(_size + 1 > _capacity)
+    {
+        size_t tmp = _capacity;
+		if(tmp == 0)
+        {
+			tmp = 1 * _multiplicativeCoef;
+		}
+		while(_size + 1 > tmp)
+        {
+			tmp *= _multiplicativeCoef;
+		}
+        reserve (tmp);
+    }
 	_size++;
 	_data[_size - 1] = Value;
 }
 
 void Vector::pushFront(const Value& value)
 {
-	reserve(_size + 1);
+    if(_size + 1 > _capacity)
+    {
+        size_t tmp = _capacity;
+		if(tmp == 0)
+        {
+			tmp = 1 * _multiplicativeCoef;
+		}
+		while(_size + 1 > tmp)
+        {
+			tmp *= _multiplicativeCoef;
+		}
+        reserve (tmp);
+    }
 	_size++;
 	for(int i = _size - 1; i > 0; i--)
     {
@@ -142,11 +170,17 @@ void Vector::insert(const Vector& vector, size_t pos)
 
 void Vector::popFront()
 {
-    for (size_t i = 0; i < _size - 1; i++)
-    {
-        _data[i] = _data[i + 1];
+    if (_size > 0){
+        for (size_t i = 0; i < _size - 1; i++)
+        {
+            _data[i] = _data[i + 1];
+        }
+        _size--;
     }
-    _size--;
+    else
+    {
+        throw std::out_of_range("size = 0");
+    }
 }
 
 void Vector::popBack()
@@ -155,12 +189,17 @@ void Vector::popBack()
     {
         _size--;
     }
+    else
+    {
+        throw std::out_of_range("size = 0");
+    }
 }
 
 void Vector::erase(size_t pos, size_t count)
 {
 	if(pos >= _size)
     {
+        throw std::out_of_range("pos >= _size");
 		return;
 	}
 	if((pos + count) > (_size))
@@ -176,15 +215,14 @@ void Vector::erase(size_t pos, size_t count)
 
 void Vector::eraseBetween(size_t beginPos, size_t endPos)
 {
-    if (endPos <= beginPos)
+	if(beginPos >= endPos)
     {
-    }
-    else if (beginPos >= _size)
-    {
-    }
+		throw std::out_of_range("beginPos >= endPos");
+		return;
+	}
     else
     {
-        erase(beginPos, endPos - beginPos);
+    	erase(beginPos, endPos - beginPos);
     }
 }
 
@@ -200,7 +238,7 @@ size_t Vector::capacity() const
 
 double Vector::loadFactor() const
 {
-    return static_cast<double>(_size/_capacity);
+    return double(_size) / double(_capacity);
 }
 
 Value& Vector::operator[](size_t idx)
@@ -215,7 +253,7 @@ const Value& Vector::operator[](size_t idx) const
 
 long long Vector::find(const Value& value) const
 {
-	for(int i = 0; i < _size; i++)
+	for(size_t i = 0; i < _size; i++)
     {
 		if(value == _data[i])
         {
@@ -225,70 +263,36 @@ long long Vector::find(const Value& value) const
 	return -1;
 }
 
-void Vector::reserve(size_t capacity)
-{
-    if ( _data == nullptr)
+void Vector::reserve(size_t capacity) {
+    if (capacity > _capacity)
     {
-        _data = new Value[1];
-    }
-    if (capacity <= _capacity)
-    {
-
-    }
-    else
-    {
-        while(_capacity < capacity)
+        Value* tmp = new Value[capacity];
+        if (_data != nullptr)
         {
-            _capacity = static_cast<size_t>(_capacity * _multiplicativeCoef);
+            for (size_t i = 0; i < _size; i++)
+            {
+                tmp[i] = _data[i];
+            }
+            delete[] _data;
         }
-
-        Value* ptr = _data;
-        _data = new Value[_capacity];
-
-        for (size_t i = 0; i < _size; ++i)
-        {
-            _data[i] = ptr[i];
-        }
-
-        delete[] ptr;
+        _data = tmp;
+        _capacity = capacity;
     }
 }
 
 void Vector::shrinkToFit()
 {
-    if (loadFactor() <= (1 / _multiplicativeCoef))
+    Value* tmp = new Value[_size];
+    if (_data != nullptr)
     {
-        while (loadFactor() <= (1 / _multiplicativeCoef))
+        for (size_t i = 0; i < _size; ++i)
         {
-            _capacity /= _multiplicativeCoef;
+            tmp[i] = _data[i];
         }
+    delete[] _data;
     }
-    Value* ptr = _data;
-    _data = new Value[_capacity];
-    for (size_t i = 0; i < _size; ++i)
-    {
-        _data[i] = ptr[i];
-    }
-    delete[] ptr;
-}
-
-bool Vector::_nullCheck()
-{
-	if (_data == nullptr)
-    {
-		return true;
-	}
-	return false;
-};
-
-void Vector::_realloc(){
-	Value* newdata = new Value[_capacity];
-	for(int i = 0; i < _size; i++)
-    {
-		newdata[i] = _data[i];
-	}
-	delete[] _data;
-	_data = newdata;
+    _data = tmp;
+    _capacity = _size;
 }
 
 Vector::Iterator Vector::begin() const

@@ -144,14 +144,14 @@ public:
     */
     void shrinkToFit();
 
-    Iterator begin();
+    Iterator begin() const;
 
-    Iterator end();
+    Iterator end() const;
 
 private:
     Value* _data = nullptr;
     size_t _size = 0;
-    size_t _capacity = 1;
+    size_t _capacity = 0;
     float _multiplicativeCoef = 2.0f;
 };
 
