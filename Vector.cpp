@@ -4,11 +4,11 @@
 Vector::Vector(const Value* rawArray, const size_t size, float coef)
 :_size(size), _multiplicativeCoef(coef)
 {
-	reserve(_size);
-	for(size_t i = 0; i < _size; i++)
+    reserve(_size);
+    for(size_t i = 0; i < _size; i++)
     {
-		_data[i] = rawArray[i];
-	}
+        _data[i] = rawArray[i];
+    }
 }
 
 Vector::Vector(const Vector& other)
@@ -19,7 +19,7 @@ Vector::Vector(const Vector& other)
     _data = new Value[_capacity];
     for(size_t i = 0; i < _size; i++)
     {
-        _data[i] = other._data[i];    
+        _data[i] = other._data[i];
     }
 }
 
@@ -45,11 +45,11 @@ Vector& Vector::operator=(const Vector& other)
 
 Vector::Vector(Vector&& other) noexcept
 {
-	_size = other._size;
+    _size = other._size;
     _multiplicativeCoef = other._multiplicativeCoef;
     _capacity = other._size;
     _data = other._data;
-	other._data = nullptr;
+    other._data = nullptr;
     other._size = 0;
     other._capacity = 0;
 }
@@ -76,7 +76,7 @@ Vector& Vector::operator=(Vector&& other) noexcept
 
 Vector::~Vector()
 {
-	delete[] _data;
+    delete[] _data;
 }
 
 void Vector::pushBack(const Value& Value)
@@ -84,18 +84,18 @@ void Vector::pushBack(const Value& Value)
     if(_size + 1 > _capacity)
     {
         size_t tmp = _capacity;
-		if(tmp == 0)
+        if(tmp == 0)
         {
-			tmp = 1 * _multiplicativeCoef;
-		}
-		while(_size + 1 > tmp)
+            tmp = 1 * _multiplicativeCoef;
+        }
+        while(_size + 1 > tmp)
         {
-			tmp *= _multiplicativeCoef;
-		}
+            tmp *= _multiplicativeCoef;
+        }
         reserve (tmp);
     }
-	_size++;
-	_data[_size - 1] = Value;
+    _size++;
+    _data[_size - 1] = Value;
 }
 
 void Vector::pushFront(const Value& value)
@@ -103,37 +103,37 @@ void Vector::pushFront(const Value& value)
     if(_size + 1 > _capacity)
     {
         size_t tmp = _capacity;
-		if(tmp == 0)
+        if(tmp == 0)
         {
-			tmp = 1 * _multiplicativeCoef;
-		}
-		while(_size + 1 > tmp)
+            tmp = 1 * _multiplicativeCoef;
+        }
+        while(_size + 1 > tmp)
         {
-			tmp *= _multiplicativeCoef;
-		}
+            tmp *= _multiplicativeCoef;
+        }
         reserve (tmp);
     }
-	_size++;
-	for(int i = _size - 1; i > 0; i--)
+    _size++;
+    for(int i = _size - 1; i > 0; i--)
     {
-		_data[i] = _data[i - 1];
-	}
-	_data[0] = value;
+        _data[i] = _data[i - 1];
+    }
+    _data[0] = value;
 }
 
 void Vector::insert(const Value& value, size_t pos)
 {
-	if(pos >= _size)
+    if(pos >= _size)
     {
-		return;
-	}
-	reserve(_size + 1);
-	_size++;
-	for(int i = _size; i > pos; i--)
+        return;
+    }
+    reserve(_size + 1);
+    _size++;
+    for(int i = _size; i > pos; i--)
     {
-		_data[i] = _data[i - 1];
-	}
-	_data[pos] = value;
+        _data[i] = _data[i - 1];
+    }
+    _data[pos] = value;
 }
 
 void Vector::insert(const Value* values, size_t size, size_t pos)
@@ -152,20 +152,20 @@ void Vector::insert(const Value* values, size_t size, size_t pos)
 
 void Vector::insert(const Vector& vector, size_t pos)
 {
-	if(pos >= _size)
+    if(pos >= _size)
     {
-		return;
-	}
-	reserve(_size + vector.size());
-	_size += vector.size();
-	for(int i = _size; i > pos; i--)
+        return;
+    }
+    reserve(_size + vector.size());
+    _size += vector.size();
+    for(int i = _size; i > pos; i--)
     {
-		_data[i] = _data[i - vector.size()];
-	}
-	for(int i = 0; i < vector.size(); i++)
+        _data[i] = _data[i - vector.size()];
+    }
+    for(int i = 0; i < vector.size(); i++)
     {
-		_data[pos + i] = vector[i];
-	}
+        _data[pos + i] = vector[i];
+    }
 }
 
 void Vector::popFront()
@@ -173,9 +173,9 @@ void Vector::popFront()
     if (_size > 0){
         for (size_t i = 0; i < _size - 1; i++)
         {
-            _data[i] = _data[i + 1];
+        _data[i] = _data[i + 1];
         }
-        _size--;
+         _size--;
     }
     else
     {
@@ -197,32 +197,32 @@ void Vector::popBack()
 
 void Vector::erase(size_t pos, size_t count)
 {
-	if(pos >= _size)
+    if(pos >= _size)
     {
         throw std::out_of_range("pos >= _size");
-		return;
-	}
-	if((pos + count) > (_size))
+        return;
+    }
+    if((pos + count) > (_size))
     {
-		count = _size - pos;
-	}
-	_size -= count;
-	for(int i = pos; i < _size; i++)
+        count = _size - pos;
+    }
+    _size -= count;
+    for(int i = pos; i < _size; i++)
     {
-		_data[i] = _data[i + count];
-	}
+        _data[i] = _data[i + count];
+    }
 }
 
 void Vector::eraseBetween(size_t beginPos, size_t endPos)
 {
-	if(beginPos >= endPos)
+    if(beginPos >= endPos)
     {
-		throw std::out_of_range("beginPos >= endPos");
-		return;
-	}
+        throw std::out_of_range("beginPos >= endPos");
+        return;
+    }
     else
     {
-    	erase(beginPos, endPos - beginPos);
+        erase(beginPos, endPos - beginPos);
     }
 }
 
@@ -243,24 +243,24 @@ double Vector::loadFactor() const
 
 Value& Vector::operator[](size_t idx)
 {
-	return _data[idx];
+    return _data[idx];
 }
 
 const Value& Vector::operator[](size_t idx) const
 {
-	return _data[idx];
+    return _data[idx];
 }
 
 long long Vector::find(const Value& value) const
 {
-	for(size_t i = 0; i < _size; i++)
+    for(size_t i = 0; i < _size; i++)
     {
-		if(value == _data[i])
+        if(value == _data[i])
         {
-			return i;
-		}
-	}
-	return -1;
+            return i;
+        }
+    }
+    return -1;
 }
 
 void Vector::reserve(size_t capacity) {
@@ -311,22 +311,22 @@ Vector::Iterator::Iterator(Value* ptr) : _ptr(ptr)
 
 Value& Vector::Iterator::operator*()
 {
-	return *_ptr;
+    return *_ptr;
 }
 
 const Value& Vector::Iterator::operator*() const
 {
-	return *_ptr;
+    return *_ptr;
 }
 
 Value* Vector::Iterator::operator->()
 {
-	return _ptr;
+    return _ptr;
 }
 
 const Value* Vector::Iterator::operator->() const
 {
-	return _ptr;
+    return _ptr;
 }
 
 Vector::Iterator Vector::Iterator:: operator++()
@@ -344,10 +344,10 @@ Vector::Iterator Vector::Iterator::operator++(int)
 
 bool Vector::Iterator::operator==(const Vector::Iterator& other) const
 {
-	return _ptr == other._ptr;
+    return _ptr == other._ptr;
 }
 
 bool Vector::Iterator::operator!=(const Vector::Iterator& other) const
 {
-	return !(*this == other);
+    return !(*this == other);
 }
