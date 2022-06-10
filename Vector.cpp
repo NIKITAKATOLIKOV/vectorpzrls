@@ -25,10 +25,7 @@ Vector::Vector(const Vector& other)
 
 Vector& Vector::operator=(const Vector& other)
 {
-    if(this == &other)
-    {
-    }
-    else
+    if(this != &other)
     {
         delete[] _data;
         _size = other._size;
@@ -56,10 +53,7 @@ Vector::Vector(Vector&& other) noexcept
 
 Vector& Vector::operator=(Vector&& other) noexcept
 {
-    if(&other == this)
-    {
-    }
-    else
+    if(&other != this)
     {
         delete[] _data;
         _size = other._size;
@@ -79,7 +73,7 @@ Vector::~Vector()
     delete[] _data;
 }
 
-void Vector::pushBack(const Value& Value)
+void Vector::_check()
 {
     if(_size + 1 > _capacity)
     {
@@ -94,25 +88,18 @@ void Vector::pushBack(const Value& Value)
         }
         reserve (tmp);
     }
+}
+
+void Vector::pushBack(const Value& Value)
+{
+    _check();
     _size++;
     _data[_size - 1] = Value;
 }
 
 void Vector::pushFront(const Value& value)
 {
-    if(_size + 1 > _capacity)
-    {
-        size_t tmp = _capacity;
-        if(tmp == 0)
-        {
-            tmp = 1 * _multiplicativeCoef;
-        }
-        while(_size + 1 > tmp)
-        {
-            tmp *= _multiplicativeCoef;
-        }
-        reserve (tmp);
-    }
+    _check();
     _size++;
     for(int i = _size - 1; i > 0; i--)
     {
@@ -123,21 +110,15 @@ void Vector::pushFront(const Value& value)
 
 void Vector::insert(const Value& value, size_t pos)
 {
-    if(pos >= _size)
-    {
-        return;
-    }
-    reserve(_size + 1);
-    _size++;
-    for(int i = _size; i > pos; i--)
-    {
-        _data[i] = _data[i - 1];
-    }
-    _data[pos] = value;
+    insert(&value, 1, pos);
 }
 
 void Vector::insert(const Value* values, size_t size, size_t pos)
 {
+    if(pos >= _size)
+    {
+        return;
+    }
     reserve(_size + size);
     for (size_t i = _size - 1; i >= pos; --i)
     {
@@ -152,20 +133,7 @@ void Vector::insert(const Value* values, size_t size, size_t pos)
 
 void Vector::insert(const Vector& vector, size_t pos)
 {
-    if(pos >= _size)
-    {
-        return;
-    }
-    reserve(_size + vector.size());
-    _size += vector.size();
-    for(int i = _size; i > pos; i--)
-    {
-        _data[i] = _data[i - vector.size()];
-    }
-    for(int i = 0; i < vector.size(); i++)
-    {
-        _data[pos + i] = vector[i];
-    }
+    insert(vector._data, vector._size, pos);
 }
 
 void Vector::popFront()
@@ -173,7 +141,7 @@ void Vector::popFront()
     if (_size > 0){
         for (size_t i = 0; i < _size - 1; i++)
         {
-        _data[i] = _data[i + 1];
+            _data[i] = _data[i + 1];
         }
          _size--;
     }
@@ -205,12 +173,14 @@ void Vector::erase(size_t pos, size_t count)
     if((pos + count) > (_size))
     {
         count = _size - pos;
+        _size -= count;
+        return;
     }
-    _size -= count;
     for(int i = pos; i < _size; i++)
     {
         _data[i] = _data[i + count];
     }
+    _size -= count;
 }
 
 void Vector::eraseBetween(size_t beginPos, size_t endPos)
